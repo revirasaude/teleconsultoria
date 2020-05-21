@@ -45,7 +45,6 @@ function carregarConsultores(){
 	//Carregar Consultores
 	$.ajax({
 		url: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSZH782wcxkKaPMbUJIjYkZCRlxGIeL-IPs4FKoocTppC_FKzKnBfc6RB6y_OJRG9GolckCG3RqcgnJ/pubhtml?gid=545001420&single=true',
-		data: 'tipo=listarConsultores',
 		type: 'POST',
 		async: false,
 		success: function(data){
