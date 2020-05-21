@@ -43,12 +43,29 @@ $(document).ready(function() {
 
 function carregarConsultores(){
 	//Carregar Consultores
-	$.ajax({
-		url: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSZH782wcxkKaPMbUJIjYkZCRlxGIeL-IPs4FKoocTppC_FKzKnBfc6RB6y_OJRG9GolckCG3RqcgnJ/pubhtml?gid=545001420&single=true',
-		type: "POST",
-		data: {id : dadosConsultores},
-		dataType: "html"
-	});
+	$('#loading').html("https://docs.google.com/spreadsheets/d/e/2PACX-1vSZH782wcxkKaPMbUJIjYkZCRlxGIeL-IPs4FKoocTppC_FKzKnBfc6RB6y_OJRG9GolckCG3RqcgnJ/pubhtml?gid=545001420&single=true").fadeIn('fast');
+            $.ajax({
+                type: "POST",
+                url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSZH782wcxkKaPMbUJIjYkZCRlxGIeL-IPs4FKoocTppC_FKzKnBfc6RB6y_OJRG9GolckCG3RqcgnJ/pubhtml?gid=545001420&single=true",
+                data: "page="+pagina, 
+                cache: false,
+                success: function(html){
+                if(html){ 
+                    $('#loading').fadeOut('fast'); 
+                    $("#content").append(html); 
+                    //mostra resultado na div content 
+                    pesquisa = true; 
+               }else{ 
+                    //Criando um relatório PDF com PHP  
+                    $('#loading').html("Fim da pesquisa...").fadeIn('fast'); 
+                    pesquisa = false;  
+               }
+                },
+                error:function(html){
+                    $('#loading').html("erro...").fadeIn('fast');
+                }
+            });
+        };
 }
 
 function inicializarMapa(){
