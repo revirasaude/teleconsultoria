@@ -49,9 +49,9 @@ function carregarConsultores(){
 		async: false,
 		success: function(data){
 			//dadosConsultores = JSON.parse(data);
-			dados = JSON.parse(data);
-			dadosConsultores = dados['consultores'];
-			dadosConsultoresGeral = dados['consultores'];
+			dados = html;
+			dadosConsultores = dados['https://docs.google.com/spreadsheets/d/e/2PACX-1vSZH782wcxkKaPMbUJIjYkZCRlxGIeL-IPs4FKoocTppC_FKzKnBfc6RB6y_OJRG9GolckCG3RqcgnJ/pubhtml?gid=545001420&single=true'];
+			dadosConsultoresGeral = dados['https://docs.google.com/spreadsheets/d/e/2PACX-1vSZH782wcxkKaPMbUJIjYkZCRlxGIeL-IPs4FKoocTppC_FKzKnBfc6RB6y_OJRG9GolckCG3RqcgnJ/pubhtml?gid=545001420&single=true'];
 			dadosProfissoes = dados['profissoes'];
 			dadosFormaConsultoria = dados['forma_consultoria'];
 			dadosMunicipios = dados['municipios'];
