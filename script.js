@@ -25,9 +25,10 @@ $(document).ready(function() {
 				"top: -1.5rem;"+
 				"border-radius: 3rem 3rem 0;"+
 				"transform: rotate(45deg);"+
-				"border: 1px solid #FFFFFF";
+				"border: 1px solid #FFFFFF;"+
+				"cursor: pointer";
 		
-		html += '<span style="white-space:nowrap;"><label style="'+markerHtmlStyles+'"/>'
+		html += '<span style="white-space:nowrap; cursor: pointer;" onclick="filtrar(\''+k+'\');"><label style="'+markerHtmlStyles+'"/>'
 		html += "" + k + "</span>&nbsp;&nbsp;";
 	}
 	$("#div_legenda").html(html);
@@ -44,13 +45,15 @@ $(document).ready(function() {
 function carregarConsultores(){
 	//Carregar Consultores
 	$.ajax({
-		url: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSZH782wcxkKaPMbUJIjYkZCRlxGIeL-IPs4FKoocTppC_FKzKnBfc6RB6y_OJRG9GolckCG3RqcgnJ/pubhtml?gid=545001420&single=true',
-		data: dados,
+		url: './ajax.php',
+		data: 'tipo=listarConsultores',
+		type: 'POST',
+		async: false,
 		success: function(data){
 			//dadosConsultores = JSON.parse(data);
-			dados = html(data);
-			dadosConsultores = dados;
-			dadosConsultoresGeral = dados;
+			dados = JSON.parse(data);
+			dadosConsultores = dados['consultores'];
+			dadosConsultoresGeral = dados['consultores'];
 			dadosProfissoes = dados['profissoes'];
 			dadosFormaConsultoria = dados['forma_consultoria'];
 			dadosMunicipios = dados['municipios'];
@@ -58,7 +61,7 @@ function carregarConsultores(){
 			dadosLegenda = dados['legenda'];
 			dadosAtendimento = dados['atendimento'];
 			
-			console.log(dadosConsultores[0]);
+			console.log(dadosConsultores[11]);
 		}
 	});
 }
@@ -66,7 +69,7 @@ function carregarConsultores(){
 function inicializarMapa(){
 	//Carregar Mapa
 	mymap = L.map('mapid'/*,{dragging: !L.Browser.mobile}*/).setView([51.505, -0.09], 6);
-	L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoicmV2aXJhc2F1ZGUiLCJhIjoiY2thaDY3cjl1MGdoYzJ4cWhteHg3NzNleiJ9.uAR_3bDLrVH4rQ-O10vdMQ', {
+	L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
 		maxZoom: 18,
 		attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
 			'<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
@@ -119,7 +122,6 @@ function carregarMarcadores(){
 		}
 		
 		texto_marcador = '<b>Nome: </b></span>'+cons.nome_completo+'<br />';
-		texto_marcador += '<b>Endereço: </b>'+cons.endereco_completo+'<br />';
 		texto_marcador += '<b>Profissão: </b>'+profissao+'<br />';
 		texto_marcador += '<b>Formações, experiências e ocupação: </b><span class="more">'+formacao_experiencia_ocupacao+'</span><br />';
 		texto_marcador += '<b>Disponibilidade para teleconsultoria: </b><span class="more">'+disponibilidade_consultoria+'</span><br />';
@@ -202,8 +204,6 @@ function carregarTabela(){
 		newRowContent = '<tr style="background-color: '+background+';"><th>Nome</th>';
 		newRowContent += '<td style="word-break:break-word;">'+cons.nome_completo+'</td></tr>';
 		newRowContent += '<tr style="background-color: '+background+';"><th>Profissão</th><td style="word-break:break-word;">'+profissao+'</td></tr>';
-		//newRowContent += '<tr style="background-color: '+background+';"><th>Registro Profissional</th><td style="word-break:break-word;">'+registro_profissional+'</td></tr>';
-		newRowContent += '<tr style="background-color: '+background+';"><th>Endereço</th><td style="word-break:break-word;">'+cons.endereco_completo+'</td></tr>';
 		newRowContent += '<tr style="background-color: '+background+';"><th>Formações, experiências e ocupação atual</th><td style="word-break:break-word;">'+cons.formacao_experiencia_ocupacao+'</td></tr>';
 		newRowContent += '<tr style="background-color: '+background+';"><th>Disponibilidade para teleconsultoria</th><td style="word-break:break-word;">'+cons.disponibilidade_consultoria+'</td></tr>';
 		newRowContent += '<tr style="background-color: '+background+';"><th>Forma de teleconsultoria</th><td style="word-break:break-word;">'+cons.forma_consultoria+'</td></tr>';
@@ -247,7 +247,7 @@ function carregarFiltro(){
 	$("#atendimento").append(html);
 }
 
-function filtrar(){
+function filtrar(link_profissao = ''){
 	dadosConsultores = dadosConsultoresGeral;
 	contatos_log = '';
 	if($("#telefone_fixo").is(':checked')) { dadosConsultores = dadosConsultores.filter((obj) => obj.telefone_fixo != ''); contatos_log += 'telefone fixo - ';}
@@ -259,16 +259,21 @@ function filtrar(){
 	contatos_log = contatos_log.substring(0,contatos_log.length-3);
 	
 	profissao_log = '';
+	if(link_profissao != '') {
+		dadosConsultores = dadosConsultores.filter((obj) => obj.profissao == link_profissao);
+		profissao_log = link_profissao;
+	}
+		
 	if ( $("#profissao").val() != "-1" ) {
 		dadosConsultores = dadosConsultores.filter((obj) => obj.profissao == $("#profissao").val());
 		profissao_log = $("#profissao").val();
 	}
 	forma_consultoria_log = '';
-	if ( $("#forma_consultoria").val() != "-1" ) {
-		dadosConsultores = dadosConsultores.filter((obj) => obj.forma_consultoria.indexOf($("#forma_consultoria").val()) !== -1);
-		if ( $("#forma_consultoria").val().indexOf('Síncrona') !== -1 ) forma_consultoria_log = 'S';
-		else forma_consultoria_log = 'A';
-	}
+	//if ( $("#forma_consultoria").val() != "-1" ) {
+	//	dadosConsultores = dadosConsultores.filter((obj) => obj.forma_consultoria.indexOf($("#forma_consultoria").val()) !== -1);
+	//	if ( $("#forma_consultoria").val().indexOf('Síncrona') !== -1 ) forma_consultoria_log = 'S';
+	//	else forma_consultoria_log = 'A';
+	//}
 	idioma_log = '';
 	if ( $("#idioma").val() != "-1" ) {
 		dadosConsultores = dadosConsultores.filter((obj) => obj.idioma.indexOf($("#idioma").val()) !== -1);
@@ -280,18 +285,18 @@ function filtrar(){
 		atendimento_log = $("#atendimento").val();
 	}
 	municipio_log = '';
-	if ( $("#municipio").val() != "-1" ) {
-		estado = $("#municipio").val().substring(
-												 $("#municipio").val().lastIndexOf("(") + 1, 
-												 $("#municipio").val().lastIndexOf(")"));
-		dadosConsultores = dadosConsultores.filter((obj) => obj.estado == estado);
-		
-		municipio = $("#municipio").val().substring(
-													0, 
-													$("#municipio").val().lastIndexOf(" ("));
-		dadosConsultores = dadosConsultores.filter((obj) => obj.municipio == municipio);						   
-		municipio_log = $("#municipio").val();
-	}
+	//if ( $("#municipio").val() != "-1" ) {
+	//	estado = $("#municipio").val().substring(
+	//											 $("#municipio").val().lastIndexOf("(") + 1, 
+	//											 $("#municipio").val().lastIndexOf(")"));
+	//	dadosConsultores = dadosConsultores.filter((obj) => obj.estado == estado);
+	//	
+	//	municipio = $("#municipio").val().substring(
+	//												0, 
+	//												$("#municipio").val().lastIndexOf(" ("));
+	//	dadosConsultores = dadosConsultores.filter((obj) => obj.municipio == municipio);						   
+	//	municipio_log = $("#municipio").val();
+	//}
 	
 	if ( $("#busca_livre").val() != "" ) {
 		//Tirar acentos e outros caracteres especiais
